@@ -29,18 +29,18 @@ public class MinesweeperServiceImpl implements MinesweeperService {
 
     @Override
     public void updateFieldAfterUserStep(StepUser stepUser, Game game, Mines mines) {
-        CheckGame.checkGameId(game.getGame_id(),stepUser.getGame_id());
+        CheckGame.checkGameId(game.getGame_id(), stepUser.getGame_id());
         CheckGame.isEndOfGame(game);
         int x = stepUser.getRow();
         int y = stepUser.getCol();
         CheckGame.checkField(game, x, y);
         if (mines.getMines()[x][y] == -1) {//попали на мину, заканчиваем игру
-            loss.resultOfGame(game,mines);
+            loss.resultOfGame(game, mines);
             return;
         }
         CheckGame.near(x, y, game, mines.getMines());
-        if(game.getCountFreeFields()==0){//Победа!
-            win.resultOfGame(game,mines);
+        if (game.getCountFreeFields() == 0) {//Победа!
+            win.resultOfGame(game, mines);
         }
 
     }

@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.net.URI;
+import java.util.Optional;
+
 @RestControllerAdvice
 public class GlobalExceptionHandling {
 
@@ -21,7 +24,7 @@ public class GlobalExceptionHandling {
 
     @ExceptionHandler
     public ResponseEntity<ExceptionMessage> noGameExceptionHandler(NoGameException e){
-        return  new ResponseEntity<>(new ExceptionMessage(e.getMessage()),HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ExceptionMessage(e.getMessage()),HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
@@ -31,8 +34,7 @@ public class GlobalExceptionHandling {
 
     @ExceptionHandler
     public ResponseEntity<ExceptionMessage> alreadyCheckedFieldExceptionHandler(AlreadyCheckedFieldException e){
-//        return new ResponseEntity<>(new ExceptionMessage(e.getMessage()),HttpStatus.BAD_REQUEST);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ExceptionMessage(e.getMessage()));
+        return new ResponseEntity<>(new ExceptionMessage(e.getMessage()),HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler

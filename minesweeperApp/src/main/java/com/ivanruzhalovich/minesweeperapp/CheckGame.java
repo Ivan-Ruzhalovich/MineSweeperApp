@@ -4,7 +4,6 @@ import com.ivanruzhalovich.minesweeperapp.exceptions.AlreadyCheckedFieldExceptio
 import com.ivanruzhalovich.minesweeperapp.exceptions.EndOfGameException;
 import com.ivanruzhalovich.minesweeperapp.exceptions.IncorrectGameIdException;
 import com.ivanruzhalovich.minesweeperapp.newGame.Game;
-import com.ivanruzhalovich.minesweeperapp.steps.StepUser;
 
 import java.util.UUID;
 
@@ -17,7 +16,7 @@ public class CheckGame {
     }
 
     public static void isEndOfGame(Game game) {
-        if (game.getCountFreeFields()==0)
+        if (game.getCountFreeFields() == 0)
             game.setCompleted(true);
         if (game.isCompleted())
             throw new EndOfGameException("Конец игры, ходов больше нет!");
@@ -28,6 +27,7 @@ public class CheckGame {
             throw new AlreadyCheckedFieldException("Эта ячейка уже проверена");
     }
 
+
     public static boolean checkBeforeNextNearCheck(Game game, int[][] minesMas, int x, int y) {
         String[][] gameMas = game.getField();
         return (x < 0 || y < 0 || x >= gameMas.length || y >= gameMas[0].length
@@ -36,10 +36,27 @@ public class CheckGame {
 
     public static void near(int x, int y, Game game, int[][] mines) {//поиск мин рядом с исходной ячейки
         String[][] buf = game.getField();
-        int count = 0;
         if (CheckGame.checkBeforeNextNearCheck(game, mines, x, y)) {
             return;
         }
+        int count = nearCounter(buf,x,y,mines);
+        if (game.isCompleted()) {
+            buf[x][y] = String.valueOf(count);
+            game.setField(buf);
+            return;
+        }
+        if (count != 0) { //нашли мины рядом
+            buf[x][y] = String.valueOf(count);
+            game.setCountFreeFields(game.getCountFreeFields() - 1);
+            game.setField(buf);
+        } else {//на нашли мины рядом, рекурсивно проверяем все соседние ячейки
+            buf[x][y] = String.valueOf(0);
+            game.setCountFreeFields(game.getCountFreeFields() - 1);
+            multipleRecursiveNear(x,y,game,mines);
+        }
+    }
+    public static int nearCounter(String[][] buf, int x, int y, int [][] mines){
+        int count = 0;
         for (int i = x - 1; i <= x + 1; i++) {
             if (i < 0 || i >= buf.length) //исключаю выход за пределы
                 continue;
@@ -50,26 +67,18 @@ public class CheckGame {
                     count++;
             }
         }
-        if (game.isCompleted()) {
-            buf[x][y] = String.valueOf(count);
-            game.setField(buf);
-            return;
-        }
-        if (count != 0) { //нашли мины рядом
-            buf[x][y] = String.valueOf(count);
-            game.setCountFreeFields(game.getCountFreeFields()-1);
-            game.setField(buf);
-        } else {//на нашли мины рядом, рекурсивно проверяем все соседние ячейки
-            buf[x][y] = String.valueOf(0);
-            game.setCountFreeFields(game.getCountFreeFields()-1);
-            near(x - 1, y - 1, game, mines);
-            near(x - 1, y, game, mines);
-            near(x - 1, y + 1, game, mines);
-            near(x, y - 1, game, mines);
-            near(x, y + 1, game, mines);
-            near(x + 1, y - 1, game, mines);
-            near(x + 1, y, game, mines);
-            near(x + 1, y + 1, game, mines);
-        }
+        return count;
     }
+
+    static void multipleRecursiveNear(int x, int y,Game game,int[][] mines){
+        near(x - 1, y - 1, game, mines);
+        near(x - 1, y, game, mines);
+        near(x - 1, y + 1, game, mines);
+        near(x, y - 1, game, mines);
+        near(x, y + 1, game, mines);
+        near(x + 1, y - 1, game, mines);
+        near(x + 1, y, game, mines);
+        near(x + 1, y + 1, game, mines);
+    }
+
 }
